@@ -1,0 +1,40 @@
+/* Custom styles for better text highlighting */
+body {
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+
+/* Smooth transitions for highlighting */
+.highlighted-word {
+  transition: background-color 0.2s ease-in-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .MuiContainer-root {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  
+  .MuiTypography-h4 {
+    font-size: 1.5rem !important;
+  }
+  
+  .MuiTypography-body1 {
+    font-size: 1rem !important;
+  }
+}
+
+/* Better focus styles for accessibility */
+.MuiButton-root:focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+/* Custom slider styling */
+.MuiSlider-mark {
+  background-color: #1976d2;
+}
+
+.MuiSlider-markActive {
+  background-color: #dc004e;
+}
