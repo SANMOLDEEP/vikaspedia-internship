@@ -20,7 +20,17 @@ import Controls from './components/Controls';
 import LanguageSelector from './components/LanguageSelector';
 import TextHighlighter from './components/TextHighlighter';
 import FallbackAlert from './components/FallbackAlert';
-import Toast from './components/Toast';
+
+// Import languages for alert messages
+const languages = [
+  { code: 'en-US', name: 'English (US)', flag: '🇺🇸' },
+  { code: 'en-IN', name: 'English (India)', flag: '🇮🇳' },
+  { code: 'hi-IN', name: 'हिन्दी (Hindi)', flag: '🇮🇳' },
+  { code: 'gu-IN', name: 'ગુજરાતી (Gujarati)', flag: '🇮🇳' },
+  { code: 'mr-IN', name: 'मराठी (Marathi)', flag: '🇮🇳' },
+  { code: 'ta-IN', name: 'தமிழ் (Tamil)', flag: '🇮🇳' },
+  { code: 'te-IN', name: 'తెలుగు (Telugu)', flag: '🇮🇳' }
+];
 
 const theme = createTheme({
   palette: {
@@ -43,11 +53,9 @@ const theme = createTheme({
 });
 
 function App() {
-  const [selectedLanguage, setSelectedLanguage] = useState('en-IN');
+  const [selectedLanguage, setSelectedLanguage] = useState('en-US');
   const [speechRate, setSpeechRate] = useState(1);
   const [currentText, setCurrentText] = useState('');
-  const [toastOpen, setToastOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
 
   const {
     isSpeaking,
@@ -73,9 +81,9 @@ function App() {
       );
       
       if (!hasVoiceForLanguage) {
-        const langCode = selectedLanguage.split('.')[0];
-        setToastMessage(`Voice not supported for ${langCode}.`);
-        setToastOpen(true);
+        const langName = languages.find(lang => lang.code === selectedLanguage)?.name || selectedLanguage;
+        alert(`${langName} is not supported by this browser.`);
+        return;
       }
       
       speak(currentText, {
@@ -97,6 +105,10 @@ function App() {
     stop();
   };
 
+  const handleTextChange = (newText) => {
+    setCurrentText(newText);
+  };
+
   const handleLanguageChange = (newLanguage) => {
     if (isSpeaking) {
       stop();
@@ -112,30 +124,19 @@ function App() {
 
 
 
-  const handleToastClose = () => {
-    setToastOpen(false);
-  };
-
+  
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Container maxWidth="md" sx={{ py: 4 }}>
         <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
           <Typography variant="h4" component="h1" gutterBottom align="center" color="primary">
-            Task 1: Text Highlighting with Text-to-Speech
+            Task: Text Highlighting with Text-to-Speech
           </Typography>
           
           <Typography variant="body1" align="center" color="text.secondary" sx={{ mb: 3 }}>
             Synchronized Text-to-Speech with Real-time Highlighting
           </Typography>
-
-          <Toast
-            open={toastOpen}
-            message={toastMessage}
-            severity="warning"
-            autoHideDuration={3000}
-            onClose={handleToastClose}
-          />
 
           <FallbackAlert
             isSupported={isSupported}
@@ -164,6 +165,7 @@ function App() {
                 text={currentText}
                 currentWordIndex={currentWordIndex}
                 isSpeaking={isSpeaking}
+                onTextChange={handleTextChange}
               />
 
               {/* Speech Rate Control */}

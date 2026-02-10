@@ -1,215 +1,188 @@
-# TTS Highlight – Text-to-Speech with Real-time Highlighting
+# TTS Highlight — Text-to-Speech with Word Highlighting
 
-A React-based application that demonstrates synchronized Text-to-Speech (TTS) with real-time text highlighting for multiple Indian languages. This frontend-only solution enhances content accessibility and reading comprehension, particularly useful for educational content and digital learning platforms.
+A React app that reads text out loud and highlights words as they are spoken. It works with different Indian languages and uses your browser's built-in voice system.
 
-## 🚀 Features
+## Table of Contents
+- [About This Project](#about-this-project)
+- [Main Features](#main-features)
+- [Languages We Support](#languages-we-support)
+- [Technologies Used](#technologies-used)
+- [Browser Support](#browser-support)
+- [What You Need](#what-you-need)
+- [How to Set Up](#how-to-set-up)
+- [Installing Voices](#installing-voices)
+- [How to Use](#how-to-use)
+- [Project Structure](#project-structure)
+- [How It Works](#how-it-works)
+- [Voice Selection](#voice-selection)
+- [Known Issues](#known-issues)
+- [Help & Support](#help--support)
+- [Developer](#developer)
+- [License](#license)
 
-- **Real-time Text Highlighting**: Words are highlighted as they are spoken for better comprehension
-- **Multi-language Support**: Supports 6 Indian languages including English, Hindi, Gujarati, Marathi, Tamil, and Telugu
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
-- **Speech Rate Control**: Adjustable speech speed from 0.5x to 2.0x
-- **Cross-browser Compatibility**: Tested on Chrome, Firefox, Edge, Opera, and Safari
-- **Content Display**: Shows sample text content from data files
-- **Voice Support Notifications**: Toast alerts for unsupported voice fallbacks
-- **Clean UI**: Modern Material-UI design with intuitive controls
+## About This Project
 
-## 🌐 Supported Languages
+This is a simple web app that reads text and highlights each word as it's spoken. It's made to help people learn and understand better, especially for Indian languages.
 
-| Language | Code | Voice Support |
-|----------|------|---------------|
-| English | en-IN | ✅ Available |
-| Hindi | hi-IN | ✅ Available |
-| Gujarati | gu-IN | ✅ Available |
-| Marathi | mr-IN | ✅ Available |
-| Tamil | ta-IN | ✅ Available |
-| Telugu | te-IN | ✅ Available |
+## Main Features
 
-## 🛠️ Technology Stack
+- **Word Highlighting**: Words light up as they are spoken
+- **Multiple Languages**: Works with English and Hindi
+- **Edit Text**: You can change the text while keeping all features working
+- **Playback Controls**: Play, Pause, Resume, and Stop buttons
+- **Speed Control**: Make speech faster or slower (0.5x to 2.0x)
+- **Sample Texts**: Comes with example texts for each language
+- **Works on All Devices**: Good for phones and computers
+- **Auto Voice Detection**: Finds the best voice automatically
 
-- **React 19.2.3** - Modern hooks-based approach with functional components
-- **Material-UI (MUI) 7.3.7** - UI components and theming system
-- **Web Speech API** - Browser-native text-to-speech functionality
-- **JavaScript ES6+** - Modern JavaScript features and syntax
-- **Vite** - Fast development server and build tool
+## Languages We Support
 
-## 📱 Browser Compatibility
+| Language | Code | Status | Notes |
+|----------|-------|--------|-------|
+| English (US) | `en-US` | Ready to Use | Works in most browsers |
+| English (India) | `en-IN` | Ready to Use | Works in most browsers |
+| Hindi | `hi-IN` | Ready to Use | Better if you install the voice |
 
-| Browser | Version | Status | Notes |
-|---------|---------|--------|-------|
-| Google Chrome | 90+ | ✅ Excellent | Full feature support |
-| Mozilla Firefox | 85+ | ✅ Good | Some voice limitations |
-| Microsoft Edge | 90+ | ✅ Excellent | Full feature support |
-| Opera | 75+ | ✅ Good | Similar to Chrome |
-| Safari | 14+ | ⚠️ Limited | Voice availability varies |
+## Technologies Used
 
-### Known Limitations
+- **React 18.2.0**: Modern JavaScript for building the app
+- **Material-UI 5.15.0**: Nice looking buttons and layouts
+- **Web Speech API**: Browser's built-in text-to-speech
+- **JavaScript ES6+**: Modern JavaScript features
+- **Vite 5.0.8**: Fast tool for building and running the app
 
-- **Safari**: Limited voice support for regional languages
-- **Firefox**: May have fewer available voices for some languages
-- **Mobile Browsers**: Voice availability depends on device and OS version
-- **Regional Language Support**: Availability varies by browser and device
+## Browser Support
 
-## 📋 Prerequisites
+| Browser | Computer | Phone | How Well It Works |
+|----------|-----------|--------|-----------------|
+| Chrome | Full Support | Full Support | Works Best |
+| Edge | Full Support | Full Support | Works Great |
+| Firefox | Full Support | Full Support | Works Well |
+| Safari | Full Support | Some Support | Voice quality varies |
+| Opera | Full Support | Full Support | Like Chrome |
 
-- Node.js 14+ and npm
-- Modern web browser with Web Speech API support
-- Internet connection for initial setup
+## What You Need
 
-## 🚀 Setup Instructions
+- **Node.js**: Version 14 or newer
+- **Modern Browser**: Chrome, Firefox, Edge, or Safari
+- **Internet**: For downloading voices if needed
 
-### Step 1: Clone the Repository
+## How to Set Up
+
+### Get the Code
 
 ```bash
-git clone https://github.com/your-username/TTS-highlight.git
+git clone https://github.com/SANMOLDEEP/vikaspedia-internship/tree/main/task%201/TTS-highlight
 cd TTS-highlight
 ```
 
-### Step 2: Install Dependencies
+### Install Packages
 
 ```bash
 npm install
 ```
 
-### Step 3: Start the Development Server
+### Start the App
 
 ```bash
-npm start
+npm run dev
 ```
 
-The application will open in your default browser at `http://localhost:5173`.
+Open your browser and go to: http://localhost:5173
 
-### Step 4: Build for Production
+### Build for Live Use
 
 ```bash
 npm run build
 ```
 
-The production build will be created in the `dist` folder.
+### Test the Live Version
 
-## 🎯 How to Use
+```bash
+npm run preview
+```
 
-1. **Select Language**: Choose from the dropdown menu of supported languages
-2. **Adjust Speech Rate**: Use the slider to control reading speed (0.5x - 2.0x)
-3. **View Content**: Sample text is displayed based on selected language
-4. **Controls**:
-   - **Play**: Start reading the content with synchronized highlighting
-   - **Pause**: Temporarily stop reading
-   - **Resume**: Continue from where you paused
-   - **Stop**: Stop reading and reset highlighting
+## Installing Voices
 
-## 🏗️ Project Structure
+### On Windows (10/11)
+
+1. Go to Settings → Time & Language → Language
+2. Click **Add a language**
+3. Find and choose your language (like Hindi)
+4. Turn on **Text-to-speech** while installing
+5. Finish install and restart your browser
+
+### On Mac
+
+1. Go to System Preferences → Accessibility → Spoken Content
+2. Click **System Voice** → **Manage Voices**
+3. Download the voice you need
+4. Restart your browser
+
+## How to Use
+
+- **Pick Language**: Choose from the dropdown menu
+- **Set Speed**: Use the slider (0.5x to 2.0x)
+- **Edit Text**: Click Edit button, type your text, then Save or Cancel
+- **See Text**: Sample text shows for your chosen language
+- **Start Reading**: Click Play to begin with highlighting
+- **Control Reading**: Use Pause/Resume/Stop as needed
+
+## Project Structure
 
 ```
 src/
 ├── components/
-│   ├── Controls.jsx          # Playback control buttons
-│   ├── FallbackAlert.jsx     # Browser compatibility alerts
-│   ├── LanguageSelector.jsx  # Language selection dropdown
-│   ├── TextHighlighter.jsx   # Text highlighting component
-│   └── Toast.jsx            # Error notification popups
+│   ├── Controls.jsx          # Play/Pause/Resume/Stop buttons
+│   ├── FallbackAlert.jsx     # Shows if browser doesn't work
+│   ├── LanguageSelector.jsx  # Language dropdown menu
+│   └── TextHighlighter.jsx   # Highlights words while speaking
 ├── hooks/
-│   └── useSpeechSynthesis.js # Custom hook for TTS functionality
+│   └── useSpeechSynthesis.js # Text-to-speech logic
 ├── data/
-│   └── sampletxt.js         # Sample text content for different languages
-├── App.jsx                  # Main application component
-├── main.jsx                 # Application entry point
-└── App.css                  # Application styles
+│   └── sampletxt.js         # Sample texts for each language
+├── App.jsx                  # Main app component
+├── main.jsx                 # App starting point
+└── App.css                  # App styles
 ```
 
-## 🔧 Technical Implementation
+## How It Works
 
-### Text Highlighting Algorithm
+1. You choose a language from the menu
+2. The app finds voices in your browser
+3. You can edit the text if you want
+4. Click Play to start reading
+5. The app creates speech with the right voice and speed
+6. For English and Hindi: Uses browser events for exact highlighting
+7. For other languages: Uses a timer for highlighting
+8. You can Pause, Resume, or Stop anytime
 
-The application uses a sophisticated word boundary detection system:
+## Voice Selection
 
-1. **Pre-calculation**: Word boundaries are calculated before speech starts
-2. **Boundary Events**: Uses Web Speech API's `onboundary` events for precise timing
-3. **Fallback Timer**: Timer-based highlighting for non-English languages
-4. **State Management**: React hooks manage highlighting state efficiently
+1. **Exact Match**: Looks for voice with the same language code (like `hi-IN`)
+2. **Language Match**: Looks for voice with the same language (like `hi`)
+3. **First Available**: Uses any voice if no match is found
+4. **Show Alert**: Tells you if no voice works
 
-### Voice Support Detection
+## Known Issues
 
-- **Language Matching**: Checks for exact and prefix-based voice matches
-- **Fallback System**: Graceful degradation when specific voices are unavailable
-- **User Notifications**: Toast alerts inform users about voice support issues
-- **Auto-dismissal**: Notifications automatically disappear after 3 seconds
+- **Regional Languages**: May not work in all browsers/phones
+- **Highlighting**: Works best for English and Hindi
+- **Mobile Chrome**: Some highlighting issues on phones
+- **Safari**: Limited voice options for some languages
+- **Voice Quality**: Depends on your browser and system
 
-### Mobile Responsiveness
+## Help & Support
 
-- **Breakpoint System**: Uses Material-UI's responsive design system
-- **Touch-friendly Controls**: Optimized button sizes for mobile interaction
-- **Adaptive Layout**: Responsive design for different screen sizes
-- **Performance**: Optimized rendering for mobile devices
+- **No Voice**: Install the language voice and restart browser
+- **Highlighting Not Working**: Refresh the page, try another browser
+- **Phone Issues**: Use Chrome, check if voice is installed
+- **Voices Not Loading**: Wait a few seconds or refresh the page
 
-## 🧪 Testing
+## Developer
 
-### Manual Testing Checklist
+**Made by**: Anmoldeep Singh
 
-- [ ] Text highlighting syncs with speech for all supported languages
-- [ ] Play/Pause/Resume/Stop controls work correctly
-- [ ] Speech rate adjustment affects playback speed
-- [ ] Language switching updates voice and text content
-- [ ] Toast notifications appear for unsupported voices
-- [ ] Responsive design works on mobile devices
-- [ ] Graceful fallback for unavailable voices
-- [ ] Cross-browser compatibility testing
+## License
 
-### Browser Testing
-
-Test the application on different browsers to ensure compatibility:
-
-1. **Chrome**: Should work perfectly with all features
-2. **Firefox**: Test voice availability for regional languages
-3. **Edge**: Should work similarly to Chrome
-4. **Safari**: Test on macOS and iOS devices
-5. **Mobile**: Test on Android and iOS browsers
-
-## 🚨 Troubleshooting
-
-### Common Issues
-
-1. **Voice Not Available**:
-   - Toast notification will appear with fallback information
-   - Try a different language
-   - Check browser settings for speech synthesis
-   - Update browser to latest version
-
-2. **Highlighting Not Syncing**:
-   - Refresh the page and try again
-   - Check browser console for errors
-   - Ensure content is loaded properly
-
-3. **Mobile Issues**:
-   - Ensure device supports Web Speech API
-   - Check browser permissions
-   - Try different mobile browser
-
-### Debug Mode
-
-Open browser console to see:
-- Voice loading status
-- Boundary event logs
-- Error messages and warnings
-
-## 📄 License
-
-This project is part of a development task and is intended for demonstration purposes.
-
-## 🤝 Contributing
-
-This is a standalone development project. For issues or questions, please refer to the project documentation.
-
-## 📊 Project Features
-
-- ✅ **Synchronized TTS**: Text-to-speech with real-time highlighting
-- ✅ **Modern React**: Hooks-based architecture with functional components
-- ✅ **Material-UI**: Professional UI components and theming
-- ✅ **Multi-language**: Support for 6 Indian languages
-- ✅ **Cross-browser**: Compatible with major web browsers
-- ✅ **Mobile-friendly**: Responsive design for all devices
-- ✅ **Error Handling**: Graceful fallbacks and user notifications
-- ✅ **Performance**: Optimized rendering and state management
-
-## 🎯 Expected Outcome
-
-A production-quality frontend application demonstrating synchronized Text-to-Speech with real-time text highlighting across multiple languages, browsers, and devices, providing an accessible and user-friendly reading experience for diverse content types.
+This project is for learning and demonstration purposes.

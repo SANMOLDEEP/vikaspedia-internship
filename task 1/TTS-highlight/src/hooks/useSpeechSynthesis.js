@@ -9,6 +9,12 @@ export const useSpeechSynthesis = () => {
   const utteranceRef = useRef(null);
   const wordsRef = useRef([]);
 
+  // Detect mobile Chrome
+  const isMobileChrome = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && 
+           /Chrome/i.test(navigator.userAgent);
+  };
+
   useEffect(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       setIsSupported(true);
@@ -82,8 +88,7 @@ export const useSpeechSynthesis = () => {
       window.speechSynthesis.cancel();
     }
 
-    // Directly speak the actual text without test speech
-    console.log('Speaking actual text directly...');
+    console.log('Speaking text...');
     speakActualText(text, options);
   }, [isSupported, availableVoices, prepareWords, isSpeaking, isPaused]);
 
@@ -146,18 +151,20 @@ export const useSpeechSynthesis = () => {
       }
     }
 
-    // Check if language is English for highlighting
-    const isEnglish = options.lang && options.lang.startsWith('en');
+    // Check if language is English or Hindi for highlighting (but not on mobile Chrome)
+    const isHighlightingSupported = options.lang && 
+      (options.lang.startsWith('en') || options.lang.startsWith('hi')) && 
+      !isMobileChrome();
 
-    // Timer only for English highlighting
+    // Timer only for supported languages (English and Hindi)
     let wordTimer = null;
     let currentWord = 0;
 
     const startWordTimer = () => {
       if (wordTimer) clearInterval(wordTimer);
       
-      // Only start timer for English
-      if (!isEnglish) {
+      // Only start timer for supported languages
+      if (!isHighlightingSupported) {
         return;
       }
       
@@ -177,7 +184,7 @@ export const useSpeechSynthesis = () => {
     };
 
     const resumeWordTimer = () => {
-      if (!isEnglish || !isSpeaking || isPaused) return;
+      if (!isHighlightingSupported || !isSpeaking || isPaused) return;
       
       const wordsPerSecond = 2.5 * (options.rate || 1);
       const intervalMs = 1000 / wordsPerSecond;
@@ -193,8 +200,8 @@ export const useSpeechSynthesis = () => {
       }, intervalMs);
     };
 
-    // Only use boundary events for English
-    if (isEnglish) {
+    // Only use boundary events for supported languages (English and Hindi)
+    if (isHighlightingSupported) {
       utterance.onboundary = (event) => {
         if (event.name === 'word') {
           const charIndex = event.charIndex;
@@ -205,7 +212,6 @@ export const useSpeechSynthesis = () => {
           if (wordIndex !== -1) {
             setCurrentWordIndex(wordIndex);
             currentWord = wordIndex + 1;
-            currentWordRef.current = currentWord;
             
             // Stop timer if boundary events work
             if (wordTimer) {
@@ -221,7 +227,7 @@ export const useSpeechSynthesis = () => {
       setIsSpeaking(true);
       setIsPaused(false);
       
-      if (isEnglish) {
+      if (isHighlightingSupported) {
         setCurrentWordIndex(0);
         currentWord = 0;
         startWordTimer();

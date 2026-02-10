@@ -1,4 +1,7 @@
 export const textByLanguage = {
+  "en-US":
+    "Vikaspedia is a Ministry of Electronics and Information Technology, Government of India initiative. It is an AI-augmented technology initiative aimed at accelerating the availability and accessibility of digital information in Indian languages to empower citizens and catalyze digital transformation.",
+
   "en-IN":
     "Vikaspedia is a Ministry of Electronics and Information Technology, Government of India initiative. It is an AI-augmented technology initiative aimed at accelerating the availability and accessibility of digital information in Indian languages to empower citizens and catalyze digital transformation.",
 
@@ -19,5 +22,5 @@ export const textByLanguage = {
 };
 
 export const getSampleText = (language) => {
-  return textByLanguage[language] || textByLanguage["en-IN"];
+  return textByLanguage[language] || textByLanguage["en-US"];
 };

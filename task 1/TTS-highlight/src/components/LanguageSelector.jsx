@@ -3,7 +3,8 @@ import { FormControl, InputLabel, Select, MenuItem, Box } from '@mui/material';
 import { Language as LanguageIcon } from '@mui/icons-material';
 
 const languages = [
-  { code: 'en-IN', name: 'English', flag: '🇮🇳' },
+  { code: 'en-US', name: 'English (US)', flag: '🇺🇸' },
+  { code: 'en-IN', name: 'English (India)', flag: '🇮🇳' },
   { code: 'hi-IN', name: 'हिन्दी (Hindi)', flag: '🇮🇳' },
   { code: 'gu-IN', name: 'ગુજરાતી (Gujarati)', flag: '🇮🇳' },
   { code: 'mr-IN', name: 'मराठी (Marathi)', flag: '🇮🇳' },
@@ -18,8 +19,10 @@ const LanguageSelector = ({
   disabled = false 
 }) => {
   const isLanguageSupported = (langCode) => {
-    // Only English has full highlighting support
-    return langCode.startsWith('en');
+    // Check if browser has voices available for this language
+    return availableVoices.some(voice => 
+      voice.lang === langCode || voice.lang.startsWith(langCode.split('-')[0])
+    );
   };
 
   return (
@@ -59,16 +62,11 @@ const LanguageSelector = ({
           }}
         >
           {languages.map((lang) => {
-            const isSupported = isLanguageSupported(lang.code);
             return (
               <MenuItem 
                 key={lang.code} 
                 value={lang.code}
                 sx={{
-                  opacity: isSupported ? 1 : 0.7,
-                  '&:hover': {
-                    opacity: 1
-                  },
                   minHeight: 'auto',
                   py: 1
                 }}
