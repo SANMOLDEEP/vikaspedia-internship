@@ -1,0 +1,366 @@
+# =====================================================================================
+# SPRING BOOT PRODUCTION CONFIGURATION
+# =====================================================================================
+# This file contains production-ready configuration for the SEO Keyword Generator
+# application with optimized settings for performance, security, and reliability.
+# =====================================================================================
+
+# =====================================================================================
+# CACHE CONFIGURATION
+# =====================================================================================
+# Cache TTL Documentation:
+# - trend-data-ttl: 24h - Trend data is cached for 24 hours to reduce repeated API calls
+#   while keeping results reasonably fresh. This balances performance with data freshness.
+# - keyword-cache-ttl: 24h - Generated keywords are cached for 24 hours
+# - autocomplete-cache-ttl: 12h - Google Autocomplete results cached for 12 hours
+#
+# Rationale: 24-hour TTL provides good balance between:
+# - Performance: Avoids repeated expensive API calls
+# - Freshness: Data remains reasonably current for SEO purposes
+# - Resource usage: Prevents excessive cache storage
+# =====================================================================================
+
+# =====================================================================================
+# SERVER CONFIGURATION
+# =====================================================================================
+server:
+  port: 8080
+  # Server-specific settings
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  # Tomcat configuration for production
+  tomcat:
+    # Maximum number of threads that can be created
+    threads:
+      max: 200
+      min-spare: 10
+    # Maximum number of connections that can be accepted
+    max-connections: 8192
+    # Maximum number of requests that can be queued
+    accept-count: 100
+    # Connection timeout in milliseconds
+    connection-timeout: 20000
+    # Maximum size of HTTP post request
+    max-http-post-size: 2MB
+    # Maximum size of HTTP header
+    max-http-header-size: 8KB
+
+# =====================================================================================
+# SPRING APPLICATION CONFIGURATION
+# =====================================================================================
+spring:
+  # ===================================================================================
+  # APPLICATION CONFIGURATION
+  # ===================================================================================
+  application:
+    name: keyword-generator
+    version: 1.0.0
+  
+  # ===================================================================================
+  # JACKSON CONFIGURATION (JSON Serialization)
+  # ===================================================================================
+  jackson:
+    # Handle Java 8 time types (LocalDateTime, etc.)
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+    # Enable JSR310 module for LocalDateTime support
+    time-zone: Asia/Kolkata
+  
+  # ===================================================================================
+  # DATABASE CONFIGURATION (MySQL)
+  # ===================================================================================
+  datasource:
+    # JDBC URL with production-ready parameters
+    
+    url: ${DB_URL:jdbc:mysql://localhost:3306/keyword_generator?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=Asia/Kolkata&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true&cachePrepStmts=true&useServerPrepStmts=true&prepStmtCacheSize=250&prepStmtCacheSqlLimit=2048}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+    # HikariCP connection pool configuration (production optimized)
+    hikari:
+      # Maximum pool size
+      maximum-pool-size: 20
+      # Minimum idle connections
+      minimum-idle: 5
+      # Connection timeout in milliseconds
+      connection-timeout: 30000
+      # Maximum lifetime of connections in milliseconds (30 minutes)
+      max-lifetime: 1800000
+      # Idle timeout for connections in milliseconds (10 minutes)
+      idle-timeout: 600000
+      # Pool name for monitoring
+      pool-name: KeywordGeneratorPool
+      # Leak detection threshold in milliseconds
+      leak-detection-threshold: 60000
+      # Connection test query
+      connection-test-query: SELECT 1
+      # Validation timeout in milliseconds
+      validation-timeout: 5000
+
+  # ===================================================================================
+  # JPA / HIBERNATE CONFIGURATION
+  # ===================================================================================
+  jpa:
+    hibernate:
+      # DDL strategy - 'validate' for production (no schema changes)
+      ddl-auto: validate
+    # Show SQL in logs (disable in production for performance)
+    show-sql: false
+    # Format SQL for better readability
+    properties:
+      hibernate:
+       # Enable batch processing for better performance
+        jdbc:
+          batch_size: 50
+          batch_versioned_data: true
+        # Order inserts for batch optimization
+        order_inserts: true
+        order_updates: true
+        # Disable second-level cache (using Spring Cache instead)
+        cache:
+          use_second_level_cache: false
+          use_query_cache: false
+        # Statistics for monitoring (disable in production if not needed)
+        generate_statistics: false
+        # Connection settings
+        connection:
+          provider_disables_autocommit: false
+          handover_mode: false
+          # Handle autocommit properly
+          autocommit: false
+        # Query optimization
+        query:
+          plan_cache_max_size: 4096
+          plan_parameter_metadata_max_size: 128
+        # Statement fetch size for large result sets
+        default_batch_fetch_size: 50
+        # Enable JDBC scrollable results
+        use_scrollable_resultset: true
+        # Enable stream results for large datasets
+        use_streams_for_binary: true
+
+  # ===================================================================================
+  # REDIS CONFIGURATION
+  # ===================================================================================
+  data:
+    redis:
+      # Redis server configuration
+      host: localhost
+      port: 6379
+      password: # Set if Redis requires authentication
+      database: 0
+      # Connection timeout in milliseconds
+      timeout: 5000
+      # Lettuce connection pool configuration
+      lettuce:
+        pool:
+          # Maximum active connections
+          max-active: 20
+          # Maximum idle connections
+          max-idle: 10
+          # Minimum idle connections
+          min-idle: 2
+          # Maximum wait time for connection
+          max-wait: 5000ms
+          # Connection timeout
+          time-between-eviction-runs: 30000ms
+          # Time before connection eviction
+          min-evictable-idle-time: 60000ms
+
+  # ===================================================================================
+  # CACHE CONFIGURATION (Redis-based)
+  # ===================================================================================
+  cache:
+    # Use Redis as cache manager
+    type: redis
+    # Redis-specific cache properties
+    redis:
+      # Time to live for cache entries (30 minutes)
+      time-to-live: 1800000ms
+      # Cache key prefix
+      key-prefix: keywordgen
+      # Use null values in cache
+      cache-null-values: false
+      # Enable cache statistics
+      use-key-prefix: true
+    # Cache names
+    cache-names:
+      - keywords
+      - trending
+      - metrics
+      - health
+
+  # ===================================================================================
+  # ACTUATOR CONFIGURATION (Monitoring & Management)
+  # ===================================================================================
+  management:
+    endpoints:
+      web:
+        exposure:
+          # Expose all endpoints for monitoring (restrict in production)
+          include: health,info,metrics,prometheus,env,configprops
+    endpoint:
+      health:
+        # Show detailed health information
+        show-details: when-authorized
+        # Health check groups
+        group:
+          database:
+            include: db
+          redis:
+            include: redis
+      metrics:
+        # Enable metrics
+        enabled: true
+    # Metrics configuration
+    metrics:
+      export:
+        prometheus:
+          enabled: true
+      distribution:
+        percentiles-histogram:
+          http.server.requests: true
+        percentiles:
+          http.server.requests: 0.5,0.9,0.95,0.99
+      tags:
+        application: keywordgenerator
+
+# =====================================================================================
+# LOGGING CONFIGURATION
+# =====================================================================================
+logging:
+  # Root logger level
+  level:
+    root: INFO
+    # Application-specific logging
+    com.seo.keywordgenerator: INFO
+    # Database logging
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+    # Spring security logging
+    org.springframework.security: WARN
+    # Redis logging
+    org.springframework.data.redis: WARN
+    # HikariCP logging
+    com.zaxxer.hikari: WARN
+    # HTTP client logging
+    org.apache.http: WARN
+    # Jetty logging
+    org.eclipse.jetty: WARN
+  # Log file configuration
+  file:
+    name: logs/keyword-generator.log
+  # Log pattern for console output
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%logger{36}] - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%logger{36}] - %msg%n"
+  # Log rotation settings
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
+      total-size-cap: 1GB
+      file-name-pattern: logs/keyword-generator.%d{yyyy-MM-dd}.%i.log
+
+# =====================================================================================
+# CUSTOM APPLICATION CONFIGURATION
+# =====================================================================================
+app:
+  trends:
+    # Cache TTL Documentation:
+    # - cache-ttl-real-time: PT6H (6 hours) - Real-time trend data cached for 6 hours
+    # - cache-ttl-pytrends: PT24H (24 hours) - Pytrends data cached for 24 hours
+    # Rationale: 6-hour TTL for real-time data ensures freshness while reducing API calls
+    # 24-hour TTL for Pytrends provides good balance between performance and data freshness
+    cache-ttl-real-time: PT6H
+    cache-ttl-pytrends: PT24H
+    autocomplete:
+      rate-limit-per-minute: 10
+      timeout-ms: 1500
+  # Keyword generation settings
+  keyword:
+    # Default maximum keywords to generate
+    max-keywords: 20
+    # Default include long-tail keywords
+    include-long-tail: true
+    # Cache TTL for generated keywords (milliseconds)
+    cache-ttl: 1800000
+    # Minimum content length for processing
+    min-content-length: 10
+    # Maximum content length for processing
+    max-content-length: 10000
+    # Processing timeout (milliseconds)
+    processing-timeout: 30000
+  
+  # Performance settings
+  performance:
+    # Thread pool size for async processing
+    thread-pool-size: 4
+    # Queue capacity for async processing
+    queue-capacity: 100
+    # Maximum concurrent requests
+    max-concurrent-requests: 50
+  
+  # Security settings
+  security:
+    # Enable CORS for specific origins (restrict in production)
+    cors:
+      allowed-origins: "http://localhost:3000,http://localhost:8080"
+      allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+      allowed-headers: "*"
+      allow-credentials: true
+      max-age: 3600
+
+scheduler:
+  trending:
+    enabled: true
+    cron: "0 0 2 * * *"
+    cache-duration: PT24H
+    max-keywords: 100
+    pytrends-batch-size: 3
+    pytrends-sleep-seconds: "8.0"
+    python-command: python
+    pytrends-script: backend/scripts/pytrends_prefetch.py
+
+# =====================================================================================
+# DEVELOPMENT PROFILES (Optional)
+# =====================================================================================
+---
+# Development profile configuration
+spring:
+  config:
+    activate:
+      on-profile: dev
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  h2:
+    console:
+      enabled: true
+logging:
+  level:
+    com.seo.keywordgenerator: DEBUG
+    org.hibernate.SQL: DEBUG
+
+---
+# Production profile configuration
+spring:
+  config:
+    activate:
+      on-profile: prod
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+logging:
+  level:
+    root: WARN
+    com.seo.keywordgenerator: INFO
