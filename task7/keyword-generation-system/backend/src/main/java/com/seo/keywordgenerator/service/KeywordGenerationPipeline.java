@@ -31,6 +31,11 @@ public class KeywordGenerationPipeline {
     private final KeywordValidator keywordValidator;
     private final CacheService cacheService;
     private final TrendingKeywordScheduler trendingScheduler;
+    private final KeywordExtractionService keywordExtractionService;
+    private final KeywordOptimizationService keywordOptimizationService;
+    private final KeywordRankingService keywordRankingService;
+    private final KeywordValidationService keywordValidationService;
+    private final KeywordClusterService keywordClusterService;
     
     private final ExecutorService executorService = Executors.newFixedThreadPool(4);
     
@@ -71,67 +76,22 @@ public class KeywordGenerationPipeline {
             cacheMisses++;
             log.debug("Cache miss, proceeding with optimized pipeline processing");
             
-            // Step 3: Preprocess text
-            String preprocessedContent;
-            try {
-                preprocessedContent = textPreprocessor.preprocessText(request.getContent());
-                log.debug("Text preprocessed: {}", preprocessedContent);
-            } catch (Exception e) {
-                log.warn("Error preprocessing text, using original content: {}", e.getMessage());
-                preprocessedContent = request.getContent();
-            }
-            
-            // Step 4: Extract keywords using multiple methods (parallel processing with optimized data structures)
-            Set<String> extractedKeywords;
-            try {
-                extractedKeywords = extractKeywordsParallelOptimized(preprocessedContent);
-                log.debug("Extracted {} unique keywords", extractedKeywords.size());
-            } catch (Exception e) {
-                log.error("Error extracting keywords: {}", e.getMessage(), e);
-                extractedKeywords = new HashSet<>();
-            }
-            
-            // Step 5: Generate natural keywords using templates
-            List<String> generatedKeywords;
-            try {
-                List<KeywordGeneratorEngineNew.GeneratedKeyword> generatedKeywordObjects = keywordGeneratorEngineNew.generateKeywords(
-                    new ArrayList<>(extractedKeywords), request.getMaxKeywords(), request.getContent());
-                
-                // Convert GeneratedKeyword objects to strings for next steps
-                generatedKeywords = generatedKeywordObjects.stream()
-                        .map(KeywordGeneratorEngineNew.GeneratedKeyword::getKeyword)
-                        .collect(Collectors.toList());
-                log.debug("Generated {} natural keywords", generatedKeywords.size());
-            } catch (Exception e) {
-                log.error("Error generating natural keywords: {}", e.getMessage(), e);
-                generatedKeywords = new ArrayList<>(extractedKeywords);
-            }
-            
-            // Step 6: Apply SEO optimization rules before validation
-            List<KeywordResponseDTO> optimizedKeywords;
-            try {
-                optimizedKeywords = seoOptimizer.preferLongTailKeywords(generatedKeywords, request.getMaxKeywords() * 2).stream()
-                        .map(keyword -> new KeywordResponseDTO(
-                                keyword.getKeyword(),
-                                keyword.getQualityScore() * 10.0,
-                                keyword.getType()))
-                        .limit(request.getMaxKeywords())
-                        .collect(Collectors.toList());
-                log.debug("Created {} keyword response DTOs", optimizedKeywords.size());
-            } catch (Exception e) {
-                log.error("Error converting keywords to DTOs: {}", e.getMessage(), e);
-                optimizedKeywords = generatedKeywords.stream()
-                        .map(keyword -> new KeywordResponseDTO(keyword, 50.0, "MEDIUM"))
-                        .limit(request.getMaxKeywords())
-                        .collect(Collectors.toList());
-            }
-            
-            // Step 7: Validate and score keywords (batch processing)
-            List<KeywordResponseDTO> validatedKeywords = validateAndScoreKeywordsBatch(optimizedKeywords);
-            log.debug("Validated {} keywords", validatedKeywords.size());
-            
-            // Step 8: Apply final filtering and sorting (use Set for uniqueness)
+            KeywordExtractionService.ExtractionResult extraction = keywordExtractionService.extract(request.getContent());
+            log.debug("Extracted {} raw keywords and {} topics", extraction.rawKeywords().size(), extraction.topics().size());
+
+            List<KeywordOptimizationService.KeywordCandidate> candidates = keywordOptimizationService.generateCandidates(
+                    extraction, request.getContent(), request.getMaxKeywords() * 4);
+            log.debug("Generated {} natural keyword candidates", candidates.size());
+
+            List<KeywordRankingService.RankedKeyword> rankedKeywords = keywordRankingService.rank(
+                    candidates, extraction, request.getMaxKeywords());
+            log.debug("Ranked {} keyword candidates", rankedKeywords.size());
+
+            List<KeywordResponseDTO> validatedKeywords = keywordValidationService.validateAndEnrich(rankedKeywords, extraction);
+            log.debug("Validated and enriched {} keywords", validatedKeywords.size());
+
             List<KeywordResponseDTO> finalKeywords = applyFinalFilteringAndSortingOptimized(validatedKeywords, request.getMaxKeywords());
+            keywordClusterService.assignClusters(finalKeywords);
             log.debug("Final filtered {} keywords", finalKeywords.size());
             
             // Step 9: Mark content as processed and cache results
@@ -343,8 +303,8 @@ public class KeywordGenerationPipeline {
             
             for (KeywordResponseDTO keyword : keywords) {
                 if (keyword != null && keyword.getKeyword() != null && 
-                    !seenKeywords.contains(keyword.getKeyword())) {
-                    seenKeywords.add(keyword.getKeyword());
+                    !seenKeywords.contains(keyword.getKeyword().toLowerCase(Locale.ROOT).trim())) {
+                    seenKeywords.add(keyword.getKeyword().toLowerCase(Locale.ROOT).trim());
                     uniqueKeywords.add(keyword);
                 }
             }

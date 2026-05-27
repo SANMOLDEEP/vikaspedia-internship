@@ -29,6 +29,11 @@ class KeywordGenerationPipelineTest {
         SEOOptimizer seoOptimizer = mock(SEOOptimizer.class);
         KeywordValidator validator = mock(KeywordValidator.class);
         TrendingKeywordScheduler scheduler = mock(TrendingKeywordScheduler.class);
+        KeywordExtractionService extractionService = mock(KeywordExtractionService.class);
+        KeywordOptimizationService optimizationService = mock(KeywordOptimizationService.class);
+        KeywordRankingService rankingService = mock(KeywordRankingService.class);
+        KeywordValidationService validationService = mock(KeywordValidationService.class);
+        KeywordClusterService clusterService = mock(KeywordClusterService.class);
 
         KeywordResponseDTO cached = new KeywordResponseDTO("react tutorial", 72.0, "MEDIUM", 120000);
         cached.setSource("PYTRENDS_REDIS");
@@ -43,7 +48,12 @@ class KeywordGenerationPipelineTest {
                 seoOptimizer,
                 validator,
                 cacheService,
-                scheduler
+                scheduler,
+                extractionService,
+                optimizationService,
+                rankingService,
+                validationService,
+                clusterService
         );
 
         KeywordRequestDTO request = new KeywordRequestDTO();
@@ -54,6 +64,7 @@ class KeywordGenerationPipelineTest {
         assertThat(result.getStatus()).isEqualTo("DUPLICATE_CONTENT_CACHE_HIT");
         assertThat(result.getKeywords()).hasSize(1);
         assertThat(result.getKeywords().get(0).getProcessingTimeMs()).isGreaterThanOrEqualTo(0);
-        verifyNoInteractions(textPreprocessor, keywordExtractor, rakeExtractor, keywordGenerator, seoOptimizer, validator, scheduler);
+        verifyNoInteractions(textPreprocessor, keywordExtractor, rakeExtractor, keywordGenerator, seoOptimizer, validator,
+                scheduler, extractionService, optimizationService, rankingService, validationService, clusterService);
     }
 }

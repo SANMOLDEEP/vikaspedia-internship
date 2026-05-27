@@ -247,6 +247,34 @@ public class KeywordService {
         dto.setValidationStatus(keyword.getValidationStatus());
         dto.setTrendDirection(keyword.getTrendDirection() != null ? keyword.getTrendDirection() : 0.0);
         dto.setValidatedAt(keyword.getValidatedAt());
+        dto.setConfidenceScore(Math.round(Math.min(100.0, Math.max(0.0, keyword.getScore()))));
+        dto.setSearchIntent(inferSearchIntent(keyword.getKeyword()));
+        dto.setPopularityTier(keyword.getScore() >= 80 ? "HIGH" : keyword.getScore() >= 60 ? "MEDIUM" : "LOW");
+        dto.setCluster(inferCluster(keyword.getKeyword(), dto.getSearchIntent()));
         return dto;
+    }
+
+    private String inferSearchIntent(String keyword) {
+        String lower = keyword == null ? "" : keyword.toLowerCase(Locale.ROOT);
+        if (lower.contains(" vs ") || lower.startsWith("best ") && lower.contains(" for ")) return "COMPARISON";
+        if (lower.contains("beginner")) return "BEGINNER_FOCUSED";
+        if (lower.contains("tutorial") || lower.startsWith("how to use") || lower.contains("setup")) return "TUTORIAL";
+        if (lower.contains("optimization") || lower.contains("best practices") || lower.contains("performance")) return "OPTIMIZATION_FOCUSED";
+        return "INFORMATIONAL";
+    }
+
+    private String inferCluster(String keyword, String intent) {
+        String lower = keyword == null ? "" : keyword.toLowerCase(Locale.ROOT);
+        String topic = Arrays.stream(lower.split("\\s+"))
+                .filter(word -> !Set.of("how", "to", "learn", "use", "best", "tutorial", "guide", "beginner", "beginners",
+                        "explained", "setup", "optimization", "practices", "for", "with", "vs").contains(word))
+                .limit(2)
+                .map(word -> word.isBlank() ? word : Character.toUpperCase(word.charAt(0)) + word.substring(1))
+                .collect(Collectors.joining(" "));
+        if (topic.isBlank()) topic = "General";
+        if ("COMPARISON".equals(intent)) return topic + " Comparison";
+        if ("OPTIMIZATION_FOCUSED".equals(intent)) return topic + " Optimization";
+        if ("TUTORIAL".equals(intent) || "BEGINNER_FOCUSED".equals(intent)) return topic + " Learning";
+        return topic + " Research";
     }
 }

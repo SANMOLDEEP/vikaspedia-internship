@@ -18,18 +18,51 @@ The goal of the project is not only to generate words, but to generate useful ke
 
 Core features:
 
-- Content-based keyword generation.
-- RAKE-based key phrase extraction.
-- Lightweight keyword extraction and phrase scoring.
-- Intent-aware keyword generation templates.
-- SEO optimization with long-tail preference.
-- Demand validation using cached Pytrends data and Google Autocomplete.
-- Redis caching for generated keyword results.
-- MySQL storage for generated keywords.
-- API response metadata for validation source, estimated status, trend direction, and processing time.
-- Auto-suggest from internal search analytics.
-- Internal search analytics storage.
-- Keyword clustering by concept, pattern, and popularity tier.
+- Content-based keyword generation with natural long-tail bias.
+- RAKE + noun-phrase extraction.
+- Intent-aware optimization templates (tutorial / comparison / beginner / optimization).
+- Naturalness + quality ranking (removes duplicates and low-quality/broken phrases).
+- Demand validation using:
+  - Google Autocomplete ("is searched?")
+  - Cached Pytrends popularity prefilled into Redis
+- Redis caching for low-latency keyword responses.
+- MySQL storage for generated keywords + internal analytics.
+- Keyword enrichment with:
+  - confidenceScore
+  - searchIntent
+  - popularityTier
+  - cluster
+
+## Keyword-Quality Pipeline
+
+The backend generates keywords through a multi-stage pipeline:
+
+```text
+KeywordExtractionService
+  - preprocess + tokenization
+  - RAKE + noun phrases + cached trending seeds
+  - internal token frequency (for topic scoring)
+
+KeywordOptimizationService
+  - generates natural long-tail candidates
+  - applies intent/pattern templates
+      |
+      v
+KeywordRankingService
+  - scores phrase naturalness + relevance
+  - boosts long-tail candidates
+      |
+      v
+KeywordValidationService
+  - batch validates using existing trend signals
+  - confidenceScore + popularityTier
+  - internal frequency lookup via KeywordRepository
+      |
+      v
+KeywordClusterService
+  - assigns topic clusters using searchIntent + keyword text
+```
+
 
 ## Technology Stack
 
@@ -113,18 +146,23 @@ Response example:
   {
     "keyword": "vue tutorial guide",
     "score": 62.0,
-    "searchVolume": 0,
+    "confidenceScore": 78.4,
+    "searchVolume": 120,
     "type": "LONG_TAIL",
     "estimated": true,
     "source": "GOOGLE_AUTOCOMPLETE",
-    "validationStatus": "ESTIMATED",
+    "validationStatus": "WEAKLY_VALIDATED",
     "trendDirection": 0.1,
+    "searchIntent": "TUTORIAL",
+    "popularityTier": "MEDIUM",
+    "cluster": "Vue Js Tutorials",
     "processingTimeMs": 728,
     "createdAt": "2026-05-14 13:00:00",
     "validatedAt": "2026-05-14 13:00:00"
   }
 ]
 ```
+
 
 ## Database
 
@@ -242,11 +280,14 @@ The scheduler uses:
 - `TrendingKeywordScheduler`
 - `backend/scripts/pytrends_prefetch.py`
 
+### Pytrends caching (Redis)
+
 The Python script stores Pytrends popularity in Redis using keys such as:
 
 ```text
 trend:pyt:<keyword>
 ```
+
 
 ## Configuration
 
@@ -271,4 +312,8 @@ Database credentials are read from environment variables in `backend/src/main/re
 username: ${DB_USERNAME:root}
 password: ${DB_PASSWORD:}
 ```
+## Internal keyword frequency lookup
+
+During validation/enrichment, the pipeline performs an internal frequency lookup using `KeywordRepository.countByKeywordIgnoreCase(keyword)`. This helps boost phrases that have strong token overlap with the user’s content and reduces low-quality duplicates.
+
 This project shows how SEO keyword generation can be made fast and practical using RAKE-based keyword extraction, caching, and real search-demand validation in a production-style system.

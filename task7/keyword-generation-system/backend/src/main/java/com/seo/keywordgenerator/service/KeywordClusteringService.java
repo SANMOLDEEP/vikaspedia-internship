@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class KeywordClusteringService {
+
+    private final KeywordClusterService keywordClusterService;
     
     /**
      * Cluster keywords by similarity and semantic meaning
@@ -20,20 +22,8 @@ public class KeywordClusteringService {
         if (keywords == null || keywords.isEmpty()) {
             return new HashMap<>();
         }
-        
-        Map<String, List<KeywordResponseDTO>> clusters = new HashMap<>();
-        
-        // Strategy 1: Cluster by common words/prefixes
-        clusters.putAll(clusterByCommonWords(keywords));
-        
-        // Strategy 2: Cluster by semantic patterns
-        clusters.putAll(clusterByPatterns(keywords));
-        
-        // Strategy 3: Cluster by popularity tiers
-        clusters.putAll(clusterByPopularity(keywords));
-        
-        // Remove empty clusters and merge similar ones
-        return cleanAndMergeClusters(clusters);
+
+        return keywordClusterService.clusterKeywords(keywords);
     }
     
     /**

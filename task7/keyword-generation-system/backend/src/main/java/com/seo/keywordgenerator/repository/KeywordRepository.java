@@ -26,4 +26,6 @@ public interface KeywordRepository extends JpaRepository<Keyword, Long> {
     List<Keyword> findByTypeOrderByScoreDesc(@Param("type") String type);
     
     boolean existsByKeyword(String keyword);
+
+    long countByKeywordIgnoreCase(String keyword);
 }

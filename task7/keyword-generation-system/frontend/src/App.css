@@ -161,6 +161,7 @@ body {
   background: #fff;
   transition: var(--transition);
   line-height: 1.7;
+  color: var(--text-primary); 
 }
 
 .content-textarea:focus {

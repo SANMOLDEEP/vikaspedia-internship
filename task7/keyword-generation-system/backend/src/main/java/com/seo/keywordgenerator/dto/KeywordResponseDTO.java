@@ -23,6 +23,14 @@ public class KeywordResponseDTO {
 
     private double trendDirection;
 
+    private double confidenceScore;
+
+    private String searchIntent;
+
+    private String popularityTier;
+
+    private String cluster;
+
     private long processingTimeMs;
     
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
